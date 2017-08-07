@@ -1,5 +1,4 @@
-{-# LANGUAGE CPP, TemplateHaskell, RecursiveDo #-}
-{-# LANGUAGE FlexibleContexts, TypeFamilies, RecordWildCards #-}
+{-# LANGUAGE FlexibleContexts, TypeFamilies, RecordWildCards, RecursiveDo #-}
 
 module Main where
 
@@ -25,50 +24,21 @@ import Data.Monoid ((<>))
 import Data.Time.Clock
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.FileEmbed
 
 import Data.Map (Map)
 import Control.Lens hiding ((#))
 
 import Board
-import BoardUtil (showBlockedBoard) -- debug
 import Game
 import Network
 import BoardDiagram
-
--- mainWidgetFlatris :: DomBuilder t m => m ()
-#ifdef GHCJS_BROWSER
-mainWidgetFlatris = mainWidgetWithHead $ do
-  el "title" $ text "Flatris"
-  mobile_
-  stylesheet_ "css/normalize.css"
-  stylesheet_ "css/skeleton.css"
-  stylesheet_ "css/flatris.css"
-
-mobile_ :: DomBuilder t m => m ()
-mobile_ = elAttr "meta" m $ pure ()
-  where
-    m = "name"    =: "viewport"
-     <> "content" =: "width=device-width, initial-scale=1.0"
-
-stylesheet_ :: DomBuilder t m => Text -> m ()
-stylesheet_ l = elAttr "link" ss $ pure ()
-  where
-    ss = "rel"  =: "stylesheet"
-      <> "type" =: "text/css"
-      <> "href" =: l
-#else
-mainWidgetFlatris = mainWidgetWithCss (
-  $(embedFile "static/css/normalize.css") <>
-  $(embedFile "static/css/skeleton.css") <>
-  $(embedFile "static/css/flatris.css") )
-#endif
+import MainWidget
 
 main :: IO ()
 main = do
   game <- newGameWithStuff
   mainWidgetFlatris $ do
-    divClass "container2" $ app game
+    divClass "container-left" $ app game
 
     instructions
 
@@ -199,7 +169,7 @@ positionStyle :: (Num a, Show a) => (a, a) -> Map Text Text
 positionStyle (x, y) = "style" =: ("position: fixed; left: " <> tshow x <> "px; top: " <> tshow y <> "px;")
 
 instructions :: MonadWidget t m => m ()
-instructions = divClass "container" $ do
+instructions = divClass "container-left instructions" $ do
   el "p" $ text "Drop pieces coming from the well into empty spaces on board."
   el "p" $ text "Make horizontal or vertical lines to score."
   return ()

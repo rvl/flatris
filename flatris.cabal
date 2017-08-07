@@ -32,7 +32,6 @@ library
                      , random
                      , text
                      , transformers
-                     -- , text-format
                      , time
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
@@ -54,6 +53,7 @@ executable flatris-reflex
   main-is:             Main.hs
   other-modules:       Network
                      , BoardDiagram
+                     , MainWidget
   default-extensions:  OverloadedStrings
                      , TemplateHaskell
                      , RecursiveDo
