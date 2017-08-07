@@ -1,0 +1,79 @@
+.container2 {
+  margin: 0.5px 8px 8px 8px;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+
+  /*border: 1px dotted blue; */
+  margin-top: 0.5em;
+}
+
+.game {
+  cursor: default;
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.board {
+  flex: 1;
+}
+
+.board > svg {
+  /* width: 400px;
+  height: auto;
+  */
+}
+
+svg.well-svg {
+  /*
+  width: 160px;
+  height: auto;
+  */
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.5em;
+  border: 1px dotted green;
+}
+
+.right > .debug {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.title {
+  align-self: center;
+  text-align: center;
+}
+
+.clock {
+
+}
+
+.score {
+
+}
+
+.well {
+  align-self: left;
+  padding-left: 0.5em;
+}
+
+.testinfo {
+  margin-top: 1em;
+}
+
+.floating-piece {
+  pointer-events: none;
+  opacity: 0.6;
+}
