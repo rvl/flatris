@@ -18,7 +18,6 @@ flag reflex
 
 library
   hs-source-dirs:      src
-  ghc-options:         -Wall
   exposed-modules:     Board
                      , BoardUtil
                      , Display
@@ -41,6 +40,10 @@ library
                      , DeriveGeneric
                      , RecursiveDo
                      , ScopedTypeVariables
+  ghc-options:       -Wall
+  if impl(ghcjs)
+    ghc-options:       -Wall -dedupe
+    cpp-options:       -DGHCJS_BROWSER
 
 executable flatris-reflex
   if flag(reflex)
@@ -76,6 +79,10 @@ executable flatris-reflex
 
   hs-source-dirs:      app-reflex
   default-language:    Haskell2010
+  ghc-options:       -Wall
+  if impl(ghcjs)
+    ghc-options:       -Wall -dedupe
+    cpp-options:       -DGHCJS_BROWSER
 
 test-suite flatris-test
   type:                exitcode-stdio-1.0

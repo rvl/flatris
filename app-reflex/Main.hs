@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, RecursiveDo #-}
+{-# LANGUAGE CPP, TemplateHaskell, RecursiveDo #-}
 {-# LANGUAGE FlexibleContexts, TypeFamilies, RecordWildCards #-}
 
 module Main where
@@ -36,12 +36,38 @@ import Game
 import Network
 import BoardDiagram
 
+-- mainWidgetFlatris :: DomBuilder t m => m ()
+#ifdef GHCJS_BROWSER
+mainWidgetFlatris = mainWidgetWithHead $ do
+  el "title" $ text "Flatris"
+  mobile_
+  stylesheet_ "css/normalize.css"
+  stylesheet_ "css/skeleton.css"
+  stylesheet_ "css/flatris.css"
+
+mobile_ :: DomBuilder t m => m ()
+mobile_ = elAttr "meta" m $ pure ()
+  where
+    m = "name"    =: "viewport"
+     <> "content" =: "width=device-width, initial-scale=1.0"
+
+stylesheet_ :: DomBuilder t m => Text -> m ()
+stylesheet_ l = elAttr "link" ss $ pure ()
+  where
+    ss = "rel"  =: "stylesheet"
+      <> "type" =: "text/css"
+      <> "href" =: l
+#else
+mainWidgetFlatris = mainWidgetWithCss (
+  $(embedFile "static/css/normalize.css") <>
+  $(embedFile "static/css/skeleton.css") <>
+  $(embedFile "static/css/flatris.css") )
+#endif
+
 main :: IO ()
 main = do
   game <- newGameWithStuff
-  mainWidgetWithCss ( $(embedFile "static/css/normalize.css") <>
-                      $(embedFile "static/css/skeleton.css") <>
-                      $(embedFile "static/css/flatris.css") ) $ do
+  mainWidgetFlatris $ do
     divClass "container2" $ app game
 
     instructions
