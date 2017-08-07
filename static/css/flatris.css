@@ -1,13 +1,11 @@
-.container2 {
-  margin: 0.5px 8px 8px 8px;
+.container-left {
+  margin: 8px 8px 8px 8px;
 }
 
 .game {
   display: flex;
   flex-direction: row;
-
-  /*border: 1px dotted blue; */
-  margin-top: 0.5em;
+  justify-content: flex-start
 }
 
 .game {
@@ -22,7 +20,7 @@
 }
 
 .board {
-  flex: 1;
+  flex: 0 1;
 }
 
 .board > svg {
@@ -39,11 +37,10 @@ svg.well-svg {
 }
 
 .right {
-  flex: 1;
+  flex: 0 1;
   display: flex;
   flex-direction: column;
   padding-left: 0.5em;
-  border: 1px dotted green;
 }
 
 .right > .debug {
@@ -66,7 +63,7 @@ svg.well-svg {
 
 .well {
   align-self: left;
-  padding-left: 0.5em;
+  padding: 0.5em;
 }
 
 .testinfo {
@@ -76,4 +73,8 @@ svg.well-svg {
 .floating-piece {
   pointer-events: none;
   opacity: 0.6;
+}
+
+.instructions p {
+  margin-bottom: 0.5em;
 }
