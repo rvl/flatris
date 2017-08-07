@@ -20,7 +20,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Board
                      , BoardUtil
-                     , Display
+                     , BoardDiagram
                      , Game
   build-depends:       array
                      , base >=4.9 && <4.10
@@ -50,14 +50,11 @@ executable flatris-reflex
   else
     buildable: False
 
+  hs-source-dirs:      app-reflex
   main-is:             Main.hs
   other-modules:       Network
-                     , BoardDiagram
+                     , BoardWidget
                      , MainWidget
-  default-extensions:  OverloadedStrings
-                     , TemplateHaskell
-                     , RecursiveDo
-                     , ScopedTypeVariables
   build-depends:       array
                      , base
                      , containers
@@ -76,12 +73,14 @@ executable flatris-reflex
                      , text
                      , time
                      , transformers
-
-  hs-source-dirs:      app-reflex
+  default-extensions:  OverloadedStrings
+                     , TemplateHaskell
+                     , RecursiveDo
+                     , ScopedTypeVariables
   default-language:    Haskell2010
-  ghc-options:       -Wall
+  ghc-options:       -Wall -threaded -rtsopts -with-rtsopts=-N
   if impl(ghcjs)
-    ghc-options:       -Wall -dedupe
+    ghc-options:       -dedupe
     cpp-options:       -DGHCJS_BROWSER
 
 test-suite flatris-test

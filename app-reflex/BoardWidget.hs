@@ -1,4 +1,4 @@
-module BoardDiagram where
+module BoardWidget where
 
 import Diagrams.Prelude as D hiding (Dynamic(..))
 import Diagrams.Backend.Reflex as DR
@@ -12,7 +12,7 @@ import Data.Array
 
 import Board
 import Game
-import Display
+import BoardDiagram
 
 squareSize :: Int
 squareSize = 44

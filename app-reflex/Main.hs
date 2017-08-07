@@ -31,7 +31,7 @@ import Control.Lens hiding ((#))
 import Board
 import Game
 import Network
-import BoardDiagram
+import BoardWidget
 import MainWidget
 
 main :: IO ()

@@ -2,7 +2,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# OPTIONS_GHC -fno-warn-partial-type-signatures #-}
 
-module Display ( boardDiagram, floatDiagram ) where
+module BoardDiagram ( boardDiagram, floatDiagram ) where
 
 import Diagrams.Prelude
 import Diagrams.TwoD.Combinators (strutR2)
