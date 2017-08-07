@@ -1,0 +1,101 @@
+name:                flatris
+version:             0.1.0.0
+-- synopsis:            
+-- description:         
+license:             GPL-3
+license-file:        LICENSE
+author:              Rodney Lorrimar
+maintainer:          dev@rodney.id.au
+-- copyright:           
+category:            Game
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+flag reflex
+  description: Build the reflex app
+  default: True
+
+library
+  hs-source-dirs:      src
+  ghc-options:         -Wall
+  exposed-modules:     Board
+                     , BoardUtil
+                     , Display
+                     , Game
+  build-depends:       array
+                     , base >=4.9 && <4.10
+                     , diagrams-lib
+                     , diagrams-svg
+                     , extra
+                     , lens
+                     , mtl
+                     , random
+                     , text
+                     , transformers
+                     -- , text-format
+                     , time
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings
+                     , TemplateHaskell
+                     , DeriveGeneric
+                     , RecursiveDo
+                     , ScopedTypeVariables
+
+executable flatris-reflex
+  if flag(reflex)
+    buildable: True
+  else
+    buildable: False
+
+  main-is:             Main.hs
+  other-modules:       Network
+                     , BoardDiagram
+  default-extensions:  OverloadedStrings
+                     , TemplateHaskell
+                     , RecursiveDo
+                     , ScopedTypeVariables
+  build-depends:       array
+                     , base
+                     , containers
+                     , diagrams-lib
+                     , diagrams-reflex
+                     , extra
+                     , file-embed
+                     , flatris
+                     , ghcjs-dom
+                     , lens
+                     , mtl
+                     , random
+                     , reflex
+                     , reflex-dom
+                     , reflex-dom-contrib
+                     , text
+                     , time
+                     , transformers
+
+  hs-source-dirs:      app-reflex
+  default-language:    Haskell2010
+
+test-suite flatris-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Tests.hs
+  build-depends:       HUnit
+                     , QuickCheck
+                     , array
+                     , base
+                     , bytestring
+                     , extra
+                     , flatris
+                     , lens
+                     , quickcheck-instances
+                     , random
+                     , tasty
+                     , tasty-hunit
+                     , tasty-quickcheck
+                     , text
+                     , time
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings
