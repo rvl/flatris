@@ -6,7 +6,7 @@ import Control.Monad (forM_, unless)
 import System.Directory (createDirectoryIfMissing)
 
 jsexe :: FilePath
-jsexe = "dist/build/flatris-reflex/flatris-reflex.jsexe"
+jsexe = ghcjsDist </> "build/flatris-reflex/flatris-reflex.jsexe"
 
 scripts :: [FilePath]
 scripts = ["all.js", "lib.js", "out.js", "rts.js", "runmain.js"]
@@ -14,26 +14,28 @@ scripts = ["all.js", "lib.js", "out.js", "rts.js", "runmain.js"]
 jsexeFiles :: [FilePath]
 jsexeFiles = map (jsexe </>) scripts
 
+ghcjsDist :: FilePath
+ghcjsDist = "dist-ghcjs"
+
 main :: IO ()
 main = shakeArgs shakeOptions{shakeFiles="dist"} $ do
   want ["docs/index.html", "docs/.nojekyll"]
 
-  phony "example" $ need ["cabalBuild", "assets", "docs/out.js"]
-
   phony "cabalBuild" $
-    need [jsexe </> "out.js", jsexe </> "index.html"]
+    need [jsexe </> "all.js"]
 
   phony "clean" $ do
     putNormal "Cleaning files in dist"
     removeFilesAfter "dist" ["//*"]
 
-  "dist/setup-config" %> \out -> do
+  ghcjsDist </> "setup-config" %> \out -> do
     need ["flatris.cabal"]
-    cmd "cabal configure --ghcjs"
+    cmd "nix-shell --argstr compiler ghcjs --run" ["cabal configure --ghcjs --builddir=" ++ ghcjsDist]
 
   jsexeFiles &%> \out -> do
     needHaskellSources
-    cmd "cabal build"
+    () <- cmd "cabal build" ["--builddir=" ++ ghcjsDist]
+    copyAssets jsexe
 
   jsexe </> "*.min.js" %> \out -> do
     let maxi = dropExtension out -<.> "js"
@@ -52,6 +54,7 @@ main = shakeArgs shakeOptions{shakeFiles="dist"} $ do
     forM_ ["all.min.js", "all.min.js.gz"] $ \js ->
       copyFileChanged (jsexe </> js) ("docs" </> js)
     copyAssets "docs"
+    copyFileChanged out "static/index-min.html"
 
   -- github pages jekyll filters some things
   "docs/.nojekyll" %> \out -> writeFile' out ""
@@ -59,7 +62,7 @@ main = shakeArgs shakeOptions{shakeFiles="dist"} $ do
 needHaskellSources :: Action ()
 needHaskellSources = do
   sources <- getDirectoryFiles "" ["src//*.hs", "app-reflex//*.hs"]
-  need ("dist/setup-config" : sources)
+  need ((ghcjsDist </> "setup-config") : sources)
 
 copyAssets :: FilePath -> Action ()
 copyAssets dst = do
