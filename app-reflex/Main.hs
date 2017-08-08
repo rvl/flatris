@@ -40,11 +40,13 @@ main = do
   mainWidgetFlatris $ do
     divClass "container-left" $ app game
 
+gameDiv :: MonadWidget t m => m a -> m (El t, a)
+gameDiv = elAttr' "div" ("class" =: "game" <> "oncontextmenu" =: "return false;")
 
 app :: MonadWidget t m => Flatris -> m ()
 app initial = mdo
-  (elm, _) <- elAttr' "div" ("class" =: "game" <> "oncontextmenu" =: "return false;") $ do
-    divClass "board" $ void $ boardReflex gameDyn
+  (elm, (boardClick, pixelCoordEv, relPixelCoordEv)) <- gameDiv $ do
+    mouseEv <- theBoard gameDyn
 
     divClass "right" $ do
       divClass "title" $ do
@@ -60,34 +62,31 @@ app initial = mdo
 
     thePiece hoverEv hoverUpdateEv
 
-  body <- DOM.getOwnerDocumentUnsafe (_element_raw elm) >>= DOM.getBodyUnsafe
-  keyEv <- wrapDomEvent body (elementOnEventName Keypress) $ do
-    DOM.preventDefault
-    DOM.stopPropagation
-    DOM.returnValue False
-    getKeyEvent
+    return mouseEv
 
-  wheelEv <- wrapDomEvent body (elementOnEventName Wheel) $ do
-    DOM.preventDefault
-    DOM.stopPropagation
-    DOM.returnValue False
-    return False
+  (keyEv, wheelEv) <- bodyEvents elm
 
-  let pixelCoordEv = domEvent Mousemove elm
-  boardCoord <- fmap pixelToBoardCoord <$> offsetMouseEvent elm Mousemove
+  let boardCoord = pixelToBoardCoord <$> relPixelCoordEv
   let hoverUpdateEv = makeHoverEvent pixelCoordEv hoverCoord
 
   let gameInputs = FlatrisInputs
                    { fiGame = initial
                    , fiRotate = leftmost [ wheelEv
                                          , fmapMaybe keycodeRotate keyEv ]
-                   , fiDrop = leftmost [ domEvent Click elm, () <$ ffilter keycodeDrop keyEv ]
+                   , fiDrop = leftmost [ boardClick, () <$ ffilter keycodeDrop keyEv ]
                    , fiHover = boardCoord
                    , fiPush = fmapMaybe keycodeMove keyEv
                    }
   FlatrisOutputs gameDyn hoverEv hoverCoord <- flatrisNetwork gameInputs
 
   return ()
+
+theBoard :: MonadWidget t m => Dynamic t Flatris
+         -> m (Event t (), Event t (Int, Int), Event t (Int, Int))
+theBoard gameDyn = do
+  (elm, _) <- elAttr' "div" ("class" =: "board") $ boardReflex gameDyn
+  relEv <- offsetMouseEvent elm Mousemove
+  return (domEvent Click elm, domEvent Mousemove elm, relEv)
 
 keycodeRotate :: Word -> Maybe Bool
 -- space, semicolon, Q/E
@@ -113,6 +112,17 @@ keycodeMove 115 = Just MoveDown
 keycodeMove  97 = Just MoveLeft
 keycodeMove 100 = Just MoveRight
 keycodeMove   _ = Nothing
+
+bodyEvents :: MonadWidget t m => El t -> m ((Event t Word), (Event t Bool))
+bodyEvents elm = do
+  body <- DOM.getBodyUnsafe =<< DOM.getOwnerDocumentUnsafe (_element_raw elm)
+  keyEv <- wrapDomEvent body (elementOnEventName Keypress) getKeyEvent
+  wheelEv <- wrapDomEvent body (elementOnEventName Wheel) $ do
+    -- DOM.preventDefault
+    -- DOM.stopPropagation
+    -- DOM.returnValue False
+    return False
+  return (keyEv, wheelEv)
 
 -- mouse event co-ordinates relative to an element
 offsetMouseEvent elm ev = wrapDomEvent (_element_raw elm) (elementOnEventName ev) mouseOffsetXY
