@@ -10,7 +10,7 @@ import Data.Monoid ((<>))
 
 #ifdef GHCJS_BROWSER
 import Data.Text
-import GHCJS.DOM.Types (JSM(..))
+import GHCJS.DOM.Types (JSM)
 
 mainWidgetFlatris :: (forall x. Widget x ()) -> JSM ()
 mainWidgetFlatris = mainWidgetWithHead $ do

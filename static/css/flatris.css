@@ -40,12 +40,8 @@ svg.well-svg {
   flex: 0 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   padding-left: 0.5em;
-}
-
-.right > .debug {
-  overflow: hidden;
-  white-space: nowrap;
 }
 
 .title {
@@ -53,21 +49,24 @@ svg.well-svg {
   text-align: center;
 }
 
-.clock {
-
+.clock, .score {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
-.score {
+.score-label, .clock-label {
+  flex: 1;
+}
 
+.clock-timer, .score-value {
+  flex: 0 1;
 }
 
 .well {
-  align-self: left;
+  flex: 1 1;
+  align-self: center;
   padding: 0.5em;
-}
-
-.testinfo {
-  margin-top: 1em;
 }
 
 .floating-piece {
@@ -75,6 +74,73 @@ svg.well-svg {
   opacity: 0.6;
 }
 
+.floating-piece > svg {
+  pointer-events: none;
+}
+
+.help-buttons {
+  display: flex;
+}
+
+.help-buttons .button, .help-buttons .button-primary {
+  display: flex;
+  flex: 0 1;
+}
+
+.help-buttons .github {
+  margin-right: 0.5em;
+}
+
+.instructions {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: 40px;
+  top: 40px;
+  max-width: 420px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 2px solid black;
+  border-radius: 8px;
+  padding: 1em;
+}
+
 .instructions p {
   margin-bottom: 0.5em;
+}
+
+.instructions-keys {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.instructions-keys .instruction-key, .instructions-keys:hover .instruction-symbol {
+  display: inline-block;
+  text-align: center;
+}
+
+.instructions-keys:hover .instruction-key, .instructions-keys .instruction-symbol {
+  display: none;
+}
+
+.instructions-keys .row {
+  margin-bottom: 0.5em;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.instruction-key, .instruction-symbol {
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px;
+  width: 2em;
+  margin-right: 0.5em;
+  background: whitesmoke;
+}
+
+.instructions-buttons {
+  margin-top: 1em;
+  display: flex;
+  justify-content: flex-end;
 }

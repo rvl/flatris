@@ -40,7 +40,6 @@ main = do
   mainWidgetFlatris $ do
     divClass "container-left" $ app game
 
-    instructions
 
 app :: MonadWidget t m => Flatris -> m ()
 app initial = mdo
@@ -56,6 +55,8 @@ app initial = mdo
       theClock gameDyn
       theScore gameDyn
       theWell gameDyn
+
+      helpButtons
 
     thePiece hoverEv hoverUpdateEv
 
@@ -113,34 +114,22 @@ keycodeMove  97 = Just MoveLeft
 keycodeMove 100 = Just MoveRight
 keycodeMove   _ = Nothing
 
--- wheelEvent :: (Reflex t, HasDomEvent t e 'WheelTag) => e -> Event t Bool
--- wheelEvent elm = False <$ domEvent Wheel elm
-
-{-
-mouseWheelY :: IsMouseEvent e => EventM t e Double
-mouseWheelY = event >>= WheelEvent.getDeltaY
-
-wheelEvent' elm = wrapDomEvent (_element_raw elm) (elementOnEventName Wheel) getDirection
-  where getDirection = do
-          dy <- mouseWheelY
-          return (dy < 0)
--}
-
 -- mouse event co-ordinates relative to an element
 offsetMouseEvent elm ev = wrapDomEvent (_element_raw elm) (elementOnEventName ev) mouseOffsetXY
 
 theClock, theScore :: MonadWidget t m => Dynamic t Flatris -> m ()
 theClock gameDyn = divClass "clock" $ do
-  text "Clock:"
+  divClass "clock-label" $ text "Clock:"
   now <- liftIO getCurrentTime
   evTick <- tickLossy 1 now
   let evTime = _tickInfo_lastUTC <$> evTick
   let evClock = attachPromptlyDynWith clockTextMaybe gameDyn evTime
-  dynText =<< holdDyn "" (fmapMaybe id evClock)
+  divClass "clock-timer" $
+    dynText =<< holdDyn "" (fmapMaybe id evClock)
 
 theScore gameDyn = divClass "score" $ do
-  text "Score:"
-  display (view score <$> gameDyn)
+  divClass "score-label" $ text "Score:"
+  divClass "score-value" $ display (view score <$> gameDyn)
 
 makeHoverEvent :: Reflex t => Event t (Int, Int)
                -> Event t (Int, Int)
@@ -168,11 +157,32 @@ positionClass cls (x, y) = "class" =: cls <> "style" =: ("position: fixed; left:
 positionStyle :: (Num a, Show a) => (a, a) -> Map Text Text
 positionStyle (x, y) = "style" =: ("position: fixed; left: " <> tshow x <> "px; top: " <> tshow y <> "px;")
 
-instructions :: MonadWidget t m => m ()
-instructions = divClass "container-left instructions" $ do
+githubUrl :: Text
+githubUrl = "https://github.com/rvl/flatris"
+
+helpButtons :: MonadWidget t m => m (Dynamic t Bool)
+helpButtons = divClass "help-buttons" $ do
+  elAttr "a" ("href" =: githubUrl <> "target" =: "_blank" <> "class" =: "button github") (text "Code")
+  (e, _) <- elAttr' "button" ("class" =: "button-primary help") (text "Help")
+  rec
+    showHelp <- toggle False $ leftmost [ domEvent Click e, closeEv ]
+    closeEv2 <- dyn . ffor showHelp $ \s -> if s then instructions else return never
+    closeEv <- switchPromptly never closeEv2
+  return showHelp
+
+instructions :: MonadWidget t m => m (Event t ())
+instructions = divClass "instructions" $ do
+  el "h2" $ text "Instructions"
   el "p" $ text "Drop pieces coming from the well into empty spaces on board."
   el "p" $ text "Make horizontal or vertical lines to score."
-  return ()
+  divClass "instructions-keys" $ do
+    let key (k, s) = do
+          elAttr "span" ("class" =: "instruction-key") $ text k
+          elAttr "span" ("class" =: "instruction-symbol") $ text s
+    divClass "row" $ mapM_ key [ ("Q", "↺"), ("W", "↑"), ("E", "↻") ]
+    divClass "row" $ mapM_ key [ ("A", "←"), ("S", "↓"), ("D", "→"), ("F", "⏎") ]
+  divClass "instructions-buttons" $ do
+    button "Close"
 
 tshow :: Show a => a -> Text
 tshow = T.pack . show
