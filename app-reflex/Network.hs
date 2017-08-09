@@ -3,6 +3,7 @@
 module Network where
 
 import Data.Time.Clock (UTCTime, NominalDiffTime, diffUTCTime)
+import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import Control.Monad.Fix (MonadFix)
 import Reflex
 
@@ -35,6 +36,8 @@ flatrisNetwork FlatrisInputs{..} = do
   littleChaffEv <- sometimes 30 fiTick
   bigChaffEv <- only 5 fiTick
 
+  now <- hold (posixSecondsToUTCTime 0) fiTick
+
   -- fixme: this would be slightly simpler if placePiece were cut in half
   rec
     let placed = attachWith placePiece (current game) hoverCoord
@@ -42,7 +45,7 @@ flatrisNetwork FlatrisInputs{..} = do
 
     let gameEv = leftmost [ rotatePiece <$> fiRotate
                           , tag placedB fiDrop
-                          , resetGame <$ fiReset
+                          , resetGame <$> tag now fiReset
                           , happenEv]
         chaffEv = leftmost [ dropChaff <$ littleChaffEv
                            , dropChaffPiece <$ bigChaffEv

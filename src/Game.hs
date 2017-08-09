@@ -103,10 +103,9 @@ clockTextMaybe fl | isPlaying fl = Just . clockText fl
 isPlaying :: Flatris -> Bool
 isPlaying = (== Playing) . view gameState
 
--- Clear everything except the RNG and time ... hmm
-resetGame :: Flatris -> Flatris
-resetGame = useNextPiece . useNextPiece . (over board clearBoard) .
-            (gameState .~ Playing) . (score .~ 0)
+resetGame :: UTCTime -> Flatris -> Flatris
+resetGame now = useNextPiece . useNextPiece . (over board clearBoard) .
+            (gameState .~ Playing) . (score .~ 0) . (startTime .~ now)
 
 -- Put dot(s) down randomly to mess with the player
 dropChaff :: Flatris -> Flatris
@@ -121,17 +120,6 @@ dropChaffPiece :: Flatris -> Flatris
 dropChaffPiece fl = (over board (place x y b)) . (pieceGen .~ g) $ fl
   where
     (((x, y), b), g) = randomShapePos (fl ^. board) (fl ^. pieceGen)
-
-{-
-import Data.Text.Format
--- problem with reflex double-conversion library
-formatDiffTime :: NominalDiffTime -> Text
-formatDiffTime t = format (pad m) (pad s) "{}:{}"
-  where
-    pad = left 2 '0'
-    m = floor (t / 60)
-    s = t - m * 60
--}
 
 formatDiffTime :: NominalDiffTime -> Text
 formatDiffTime t = T.pack $ mconcat [display m, ":", display s]
