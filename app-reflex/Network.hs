@@ -9,12 +9,14 @@ import Reflex
 import Board
 import Game
 
-newGameWithStuff :: IO Flatris
-newGameWithStuff = do
-  game <- newGame (10, 10)
-  let p1 = Board.place 2 2 tPiece
-  let p2 = Board.place 4 4 lPiece
-  return $ over board (p2 . p1) game
+newGame10 :: IO Flatris
+newGame10 = newGame (10, 10)
+
+addStuff :: Flatris -> Flatris
+addStuff = over board (p2 . p1)
+  where
+    p1 = Board.place 2 2 tPiece
+    p2 = Board.place 4 4 lPiece
 
 data FlatrisMove = MoveLeft | MoveRight | MoveUp | MoveDown deriving Show
 
@@ -34,6 +36,7 @@ data FlatrisOutputs t = FlatrisOutputs
 
 flatrisNetwork :: (Reflex t, MonadFix m, MonadHold t m) => FlatrisInputs t -> m (FlatrisOutputs t)
 flatrisNetwork FlatrisInputs{..} = do
+  -- fixme: this would be slightly simpler if placePiece were cut in half
   rec
     let placed = attachWith placePiece (current game) hoverCoord
     placedB <- hold id (snd <$> placed)
@@ -45,8 +48,6 @@ flatrisNetwork FlatrisInputs{..} = do
 
     hoverCoord <- makeHoverCoord (() <$ updated game) fiHover fiPush
 
-  -- fixme: messy, maybe need to split placePiece in half
-  -- this needs to be a "promptly" attachment
   let hoverEv = fst <$> attachPromptlyDynWith placePiece game (leftmost [hoverCoord, fiHover])
 
   return $ FlatrisOutputs game hoverEv hoverCoord

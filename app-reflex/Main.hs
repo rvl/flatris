@@ -37,7 +37,7 @@ import BoardUtil (tshow)
 
 main :: IO ()
 main = do
-  game <- newGameWithStuff
+  game <- addStuff <$> newGame10
   mainWidgetFlatris $ do
     divClass "container-left" $ app game
 
@@ -53,7 +53,7 @@ app initial = mdo
       divClass "title" $ do
         el "h1" $ text "Flatris"
 
-      divClass "game-state" $ display (view gameState <$> gameDyn)
+      resetEv <- theGameState gameDyn
 
       theClock gameDyn
       theScore gameDyn
@@ -167,6 +167,17 @@ positionClass cls (x, y) = "class" =: cls <> "style" =: ("position: fixed; left:
 
 positionStyle :: (Num a, Show a) => (a, a) -> Map Text Text
 positionStyle (x, y) = "style" =: ("position: fixed; left: " <> tshow x <> "px; top: " <> tshow y <> "px;")
+
+theGameState :: MonadWidget t m => Dynamic t Flatris -> m (Event t ())
+theGameState gameDyn = divClass "game-state" $ switchPromptly never =<< dyn buttonDyn
+  where
+    buttonDyn = choose . view gameState <$> gameDyn
+    choose Lost = stateButton "button-primary game-lost" "Try again?"
+    choose Won = stateButton "button-primary game-won" "You're amazing!"
+    choose Playing = button "Playing" >> return never
+    stateButton cls txt = do
+      (e, _) <- elAttr' "button" ("class" =: cls) (text txt)
+      return $ domEvent Click e
 
 githubUrl :: Text
 githubUrl = "https://github.com/rvl/flatris"

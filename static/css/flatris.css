@@ -89,6 +89,10 @@ stroke: rgb(164, 0, 0);
   text-align: center;
 }
 
+.title h1 {
+  margin-bottom: 1rem;
+}
+
 .clock, .score {
   display: flex;
   flex-direction: row;
@@ -107,6 +111,15 @@ stroke: rgb(164, 0, 0);
   flex: 1 1;
   align-self: center;
   padding: 0.5em;
+}
+
+.game-state {
+  flex: 0 1;
+/*
+  display: flex;
+  justify-content: center;
+*/
+  text-align: center;
 }
 
 .floating-piece {
