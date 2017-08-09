@@ -110,9 +110,11 @@ resetGame = useNextPiece . useNextPiece . (over board clearBoard) .
 
 -- Put dot(s) down randomly to mess with the player
 dropChaff :: Flatris -> Flatris
-dropChaff fl = (over board (putSingle x y (Just p))) . (pieceGen .~ g) $ fl
+dropChaff fl = put (randomPiecePos (fl ^. board) (fl ^. pieceGen)) fl
   where
-    (((x, y), p), g) = randomPiecePos (fl ^. board) (fl ^. pieceGen)
+    put (Just (((x, y), p), g)) =
+      (over board (putSingle x y (Just p))) . (pieceGen .~ g)
+    put Nothing = id
 
 -- Put a whole piece somewhere to mess with the player
 dropChaffPiece :: Flatris -> Flatris

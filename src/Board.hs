@@ -166,15 +166,31 @@ instance Random Piece where
                       (x, g') -> (toEnum x, g')
   random g = randomR (minBound, maxBound) g
 
+emptySquares :: Board -> [(Int, Int)]
+emptySquares = map fst . filter (isNothing . snd) . assocs
 
 randomShapePos :: Board -> StdGen -> (((Int, Int), Board), StdGen)
-randomShapePos b g = (((x, y), shapeBoard p), g')
-  where (((x, y), p), g') = randomPiecePos b g
+randomShapePos b g = (((x, y), pb), g3)
+  where
+    (p, g1) = random g
+    (r, g2) = randomR (0,3) g1
+    pb = rotateN r $ shapeBoard p
+    ((x, y), g3) = randomBoardPos bounds' g2
+    bounds' = (l, (w-i, h-j))
+      where
+        (l, (w, h)) = bounds b
+        (_, (i, j)) = bounds pb
 
--- fixme: select pos from empty spaces on board
-randomPiecePos :: Board -> StdGen -> (((Int, Int), Piece), StdGen)
-randomPiecePos b g = let (p, g') = random g
-                         (_, (w,h)) = bounds b
-                         (x, g'') = randomR (1,w) g'
-                         (y, g''') = randomR (1,h) g''
-                     in (((x, y), p), g''')
+randomBoardPos :: (BIx, BIx) -> StdGen -> (BIx, StdGen)
+randomBoardPos ((x1, y1), (x2, y2)) g = ((x, y), g2)
+  where
+    (x, g1) = randomR (x1,x2) g
+    (y, g2) = randomR (y1,y2) g1
+
+randomPiecePos :: Board -> StdGen -> Maybe ((BIx, Piece), StdGen)
+randomPiecePos b g | null e = Nothing
+                   | otherwise = Just ((e !! i, p), g2)
+  where
+    e = emptySquares b
+    (p, g1) = random g
+    (i, g2) = randomR (0, length e - 1) g1

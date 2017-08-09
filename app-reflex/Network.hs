@@ -33,7 +33,7 @@ data FlatrisOutputs t = FlatrisOutputs
 flatrisNetwork :: (Reflex t, MonadFix m, MonadHold t m) => FlatrisInputs t -> m (FlatrisOutputs t)
 flatrisNetwork FlatrisInputs{..} = do
   littleChaffEv <- sometimes 30 fiTick
-  bigChaffEv <- only 4 =<< sometimes 2 fiTick
+  bigChaffEv <- only 5 fiTick
 
   -- fixme: this would be slightly simpler if placePiece were cut in half
   rec
