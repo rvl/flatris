@@ -43,9 +43,12 @@ flatrisNetwork FlatrisInputs{..} = do
     let gameEv = leftmost [ rotatePiece <$> fiRotate
                           , tag placedB fiDrop
                           , resetGame <$ fiReset
-                          , dropChaff <$ littleChaffEv
-                          , dropChaffPiece <$ bigChaffEv
-                          ]
+                          , happenEv]
+        chaffEv = leftmost [ dropChaff <$ littleChaffEv
+                           , dropChaffPiece <$ bigChaffEv
+                           ]
+        happenEv = whilePlaying game chaffEv
+
     game <- foldDyn ($) fiGame gameEv
 
     hoverCoord <- makeHoverCoord (() <$ updated game) fiHover fiPush
@@ -76,6 +79,9 @@ moveDelta MoveLeft = (-1, 0)
 moveDelta MoveRight = (1, 0)
 moveDelta MoveUp = (0, -1)
 moveDelta MoveDown = (0, 1)
+
+whilePlaying :: Reflex t => Dynamic t Flatris -> Event t a -> Event t a
+whilePlaying game = gate (current (isPlaying <$> game))
 
 -- repeat something on an interval
 sometimes :: (Reflex t, MonadFix m, MonadHold t m) => NominalDiffTime -> Event t UTCTime -> m (Event t ())

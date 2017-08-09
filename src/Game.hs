@@ -2,7 +2,7 @@
 
 module Game
   ( Flatris, GameState(..)
-  , gameState, board, nextPiece, startTime, score
+  , gameState, isPlaying, board, nextPiece, startTime, score
   , newGame, newGame'
   , rotatePiece
   , placePiece
