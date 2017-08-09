@@ -25,3 +25,8 @@ Building with nix and GHC:
 Building with nix ghcjs:
 
     nix-shell --argstr compiler ghcjs --run "cabal configure --ghcjs && cabal build"
+
+Full site build with minification (uses nix-shell and Shake). Will
+create a `docs` directory:
+
+    ./build.sh
