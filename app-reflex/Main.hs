@@ -31,8 +31,9 @@ import Control.Lens hiding ((#))
 import Board
 import Game
 import Network
-import BoardWidget
+import BoardWidgetSvg
 import MainWidget
+import BoardUtil (tshow)
 
 main :: IO ()
 main = do
@@ -84,7 +85,7 @@ app initial = mdo
 theBoard :: MonadWidget t m => Dynamic t Flatris
          -> m (Event t (), Event t (Int, Int), Event t (Int, Int))
 theBoard gameDyn = do
-  (elm, _) <- elAttr' "div" ("class" =: "board") $ boardReflex gameDyn
+  (elm, _) <- elAttr' "div" ("class" =: "board") $ boardSvg gameDyn
   relEv <- offsetMouseEvent elm Mousemove
   return (domEvent Click elm, domEvent Mousemove elm, relEv)
 
@@ -155,11 +156,11 @@ thePiece :: MonadWidget t m => Event t BlockedBoard
          -> Event t (Int, Int) -> m ()
 thePiece hover pos = do
   attrsDyn <- holdDyn mempty (positionClass "floating-piece" <$> pos)
-  let elm b = elDynAttr "div" attrsDyn (floatDia b)
+  let elm b = elDynAttr "div" attrsDyn (floatSvg b)
   void . dyn =<< holdDyn blank (elm <$> hover)
 
-theWell :: MonadWidget t m => Dynamic t Flatris -> m (Event t ())
-theWell gameDyn = elAttr "div" ("class" =: "well") (dyn (wellDia <$> gameDyn))
+theWell :: MonadWidget t m => Dynamic t Flatris -> m ()
+theWell gameDyn = elAttr "div" ("class" =: "well") (wellSvg gameDyn)
 
 positionClass :: (Num a, Show a) => Text -> (a, a) -> Map Text Text
 positionClass cls (x, y) = "class" =: cls <> "style" =: ("position: fixed; left: " <> tshow x <> "px; top: " <> tshow y <> "px;")
@@ -193,6 +194,3 @@ instructions = divClass "instructions" $ do
     divClass "row" $ mapM_ key [ ("A", "←"), ("S", "↓"), ("D", "→"), ("F", "⏎") ]
   divClass "instructions-buttons" $ do
     button "Close"
-
-tshow :: Show a => a -> Text
-tshow = T.pack . show

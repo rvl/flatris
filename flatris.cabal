@@ -22,6 +22,7 @@ library
                      , BoardUtil
                      , BoardDiagram
                      , Game
+                     , Tango
   build-depends:       array
                      , base >=4.9 && <4.10
                      , diagrams-lib
@@ -33,6 +34,7 @@ library
                      , text
                      , transformers
                      , time
+                     , colour
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
                      , TemplateHaskell
@@ -54,6 +56,7 @@ executable flatris-reflex
   main-is:             Main.hs
   other-modules:       Network
                      , BoardWidget
+                     , BoardWidgetSvg
                      , MainWidget
   build-depends:       array
                      , base
@@ -73,6 +76,7 @@ executable flatris-reflex
                      , text
                      , time
                      , transformers
+                     , colour
   default-extensions:  OverloadedStrings
                      , TemplateHaskell
                      , RecursiveDo

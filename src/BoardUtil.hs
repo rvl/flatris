@@ -2,6 +2,7 @@ module BoardUtil where
 
 import Data.List.Extra (trim, elemIndex)
 import Data.Maybe (catMaybes, listToMaybe)
+import Data.Text (Text, pack)
 
 import Board
 
@@ -81,3 +82,6 @@ otherThan p = filter (/= p) [minBound .. maxBound]
 
 boardShape :: Board -> Maybe Piece
 boardShape = listToMaybe . catMaybes . elems
+
+tshow :: Show a => a -> Text
+tshow = pack . show
