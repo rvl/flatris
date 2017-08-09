@@ -49,20 +49,21 @@ app initial = mdo
   (elm, ((boardClick, pixelCoordEv, relPixelCoordEv), (resetEv, tickEv))) <- gameDiv $ do
     mouseEvs <- theBoard gameDyn
 
-    controlEvs <- divClass "right" $ do
+    (controlEvs, helpingDyn) <- divClass "right" $ do
       divClass "title" $ do
         el "h1" $ text "Flatris"
 
-      resetEv <- theGameState gameDyn
-      tickEv <- theClock gameDyn
+      reset <- theGameState gameDyn
+      tick <- theClock gameDyn
       theScore gameDyn
       theWell gameDyn
 
-      helpButtons
+      helping <- helpButtons
 
-      return (resetEv, tickEv)
+      return ((reset, tick), helping)
 
-    thePiece hoverEv hoverUpdateEv
+    let showHover = zipDynWith (\h g -> not h && isPlaying g) helpingDyn gameDyn
+    dynIf showHover (thePiece hoverEv hoverUpdateEv) blank
 
     return (mouseEvs, controlEvs)
 
@@ -91,6 +92,9 @@ theBoard gameDyn = do
   (elm, _) <- elAttr' "div" ("class" =: "board") $ boardSvg gameDyn
   relEv <- offsetMouseEvent elm Mousemove
   return (domEvent Click elm, domEvent Mousemove elm, relEv)
+
+dynIf :: MonadWidget t m => Dynamic t Bool -> m a -> m a -> m ()
+dynIf showDyn yes no = void . dyn . fmap (\s -> if s then yes else no) $ showDyn
 
 keycodeRotate :: Word -> Maybe Bool
 -- space, semicolon, Q/E
@@ -209,5 +213,4 @@ instructions = divClass "instructions" $ do
     divClass "row" $ mapM_ key [ ("Q", "↺"), ("W", "↑"), ("E", "↻") ]
     divClass "row" $ mapM_ key [ ("A", "←"), ("S", "↓"), ("D", "→"), ("F", "⏎") ]
   el "p" $ text "Use the mouse button and scroll wheel and/or the keys to rotate and drop the piece."
-  divClass "instructions-buttons" $ do
-    button "Close"
+  divClass "instructions-buttons" $ button "Close"
