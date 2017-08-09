@@ -62,8 +62,7 @@ app initial = mdo
 
       return ((reset, tick), helping)
 
-    let showHover = zipDynWith (\h g -> not h && isPlaying g) helpingDyn gameDyn
-    dynIf showHover (thePiece hoverEv hoverUpdateEv) blank
+    dynIf helpingDyn blank (thePiece hoverEv hoverUpdateEv)
 
     return (mouseEvs, controlEvs)
 
