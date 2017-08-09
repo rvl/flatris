@@ -86,9 +86,15 @@ inBoard x y piece board = x >= 0 && y >= 0 &&
 
 -- drop a piece at a certain offset on the board
 place :: Int -> Int -> Board -> Board -> Board
-place x y piece = (// map move (filter (isJust . snd) (assocs piece)))
+place x y piece b = b // filterWithin (map move filled)
   where
+    filled = filter (isJust . snd) (assocs piece)
+    filterWithin = filter (inRange (bounds b) . fst)
     move ((i, j), e) = ((i + x, j + y), e)
+
+-- set a single square of the board
+putSingle :: Int -> Int -> Maybe Piece -> Board -> Board
+putSingle x y p = (// [((x, y), p)])
 
 intersection :: Board -> Int -> Int -> Board -> BlockedBoard
 intersection board x y piece = array (bounds piece) es
@@ -152,7 +158,23 @@ blockedAt :: Board -> Board -> BIx -> Bool
 blockedAt board piece (x, y) = any (isJust . (board !)) filled
   where filled = [(i + x, j + y) | ((i, j), Just _) <- assocs piece]
 
+clearBoard :: Board -> Board
+clearBoard = fmap (const Nothing)
+
 instance Random Piece where
   randomR (a,b) g = case randomR (fromEnum a, fromEnum b) g of
                       (x, g') -> (toEnum x, g')
   random g = randomR (minBound, maxBound) g
+
+
+randomShapePos :: Board -> StdGen -> (((Int, Int), Board), StdGen)
+randomShapePos b g = (((x, y), shapeBoard p), g')
+  where (((x, y), p), g') = randomPiecePos b g
+
+-- fixme: select pos from empty spaces on board
+randomPiecePos :: Board -> StdGen -> (((Int, Int), Piece), StdGen)
+randomPiecePos b g = let (p, g') = random g
+                         (_, (w,h)) = bounds b
+                         (x, g'') = randomR (1,w) g'
+                         (y, g''') = randomR (1,h) g''
+                     in (((x, y), p), g''')

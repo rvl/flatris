@@ -2,7 +2,7 @@
 
 module Network where
 
-import Control.Lens
+import Data.Time.Clock (UTCTime, NominalDiffTime, diffUTCTime)
 import Control.Monad.Fix (MonadFix)
 import Reflex
 
@@ -12,16 +12,12 @@ import Game
 newGame10 :: IO Flatris
 newGame10 = newGame (10, 10)
 
-addStuff :: Flatris -> Flatris
-addStuff = over board (p2 . p1)
-  where
-    p1 = Board.place 2 2 tPiece
-    p2 = Board.place 4 4 lPiece
-
 data FlatrisMove = MoveLeft | MoveRight | MoveUp | MoveDown deriving Show
 
 data FlatrisInputs t = FlatrisInputs
   { fiGame :: Flatris
+  , fiReset :: Event t ()
+  , fiTick :: Event t UTCTime
   , fiRotate :: Event t Bool
   , fiDrop :: Event t ()
   , fiHover :: Event t (Int, Int)
@@ -36,6 +32,9 @@ data FlatrisOutputs t = FlatrisOutputs
 
 flatrisNetwork :: (Reflex t, MonadFix m, MonadHold t m) => FlatrisInputs t -> m (FlatrisOutputs t)
 flatrisNetwork FlatrisInputs{..} = do
+  littleChaffEv <- sometimes 30 fiTick
+  bigChaffEv <- only 4 =<< sometimes 2 fiTick
+
   -- fixme: this would be slightly simpler if placePiece were cut in half
   rec
     let placed = attachWith placePiece (current game) hoverCoord
@@ -43,6 +42,9 @@ flatrisNetwork FlatrisInputs{..} = do
 
     let gameEv = leftmost [ rotatePiece <$> fiRotate
                           , tag placedB fiDrop
+                          , resetGame <$ fiReset
+                          , dropChaff <$ littleChaffEv
+                          , dropChaffPiece <$ bigChaffEv
                           ]
     game <- foldDyn ($) fiGame gameEv
 
@@ -74,6 +76,26 @@ moveDelta MoveLeft = (-1, 0)
 moveDelta MoveRight = (1, 0)
 moveDelta MoveUp = (0, -1)
 moveDelta MoveDown = (0, 1)
+
+-- repeat something on an interval
+sometimes :: (Reflex t, MonadFix m, MonadHold t m) => NominalDiffTime -> Event t UTCTime -> m (Event t ())
+sometimes interval tick = do
+  let isTime (Just l) now = diffUTCTime now l > interval
+      isTime Nothing _ = True
+  rec
+    lastTick <- hold Nothing (Just <$> tick')
+    let tick' = fmap snd . ffilter (uncurry isTime) . attach lastTick $ tick
+
+  dropFirst (() <$ tick')
+
+dropFirst :: (Reflex t, MonadHold t m) => Event t a -> m (Event t a)
+dropFirst ev = do
+  h <- hold False (True <$ ev)
+  return . fmap snd . ffilter fst . attach h $ ev
+
+-- limit number of events fired
+only :: (Reflex t, MonadFix m, MonadHold t m) => Int -> Event t a -> m (Event t ())
+only num ev = fmap (const ()) . ffilter (<= num) . updated <$> count ev
 
 toMaybe :: Bool -> b -> Maybe b
 toMaybe False _ = Nothing

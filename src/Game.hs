@@ -6,6 +6,8 @@ module Game
   , newGame, newGame'
   , rotatePiece
   , placePiece
+  , resetGame
+  , dropChaffPiece, dropChaff
   , clockTextMaybe
   ) where
 
@@ -100,6 +102,23 @@ clockTextMaybe fl | isPlaying fl = Just . clockText fl
 
 isPlaying :: Flatris -> Bool
 isPlaying = (== Playing) . view gameState
+
+-- Clear everything except the RNG and time ... hmm
+resetGame :: Flatris -> Flatris
+resetGame = useNextPiece . useNextPiece . (over board clearBoard) .
+            (gameState .~ Playing) . (score .~ 0)
+
+-- Put dot(s) down randomly to mess with the player
+dropChaff :: Flatris -> Flatris
+dropChaff fl = (over board (putSingle x y (Just p))) . (pieceGen .~ g) $ fl
+  where
+    (((x, y), p), g) = randomPiecePos (fl ^. board) (fl ^. pieceGen)
+
+-- Put a whole piece somewhere to mess with the player
+dropChaffPiece :: Flatris -> Flatris
+dropChaffPiece fl = (over board (place x y b)) . (pieceGen .~ g) $ fl
+  where
+    (((x, y), b), g) = randomShapePos (fl ^. board) (fl ^. pieceGen)
 
 {-
 import Data.Text.Format

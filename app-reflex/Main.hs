@@ -37,7 +37,7 @@ import BoardUtil (tshow)
 
 main :: IO ()
 main = do
-  game <- addStuff <$> newGame10
+  game <- newGame10
   mainWidgetFlatris $ do
     divClass "container-left" $ app game
 
@@ -46,24 +46,25 @@ gameDiv = elAttr' "div" ("class" =: "game" <> "oncontextmenu" =: "return false;"
 
 app :: MonadWidget t m => Flatris -> m ()
 app initial = mdo
-  (elm, (boardClick, pixelCoordEv, relPixelCoordEv)) <- gameDiv $ do
-    mouseEv <- theBoard gameDyn
+  (elm, ((boardClick, pixelCoordEv, relPixelCoordEv), (resetEv, tickEv))) <- gameDiv $ do
+    mouseEvs <- theBoard gameDyn
 
-    divClass "right" $ do
+    controlEvs <- divClass "right" $ do
       divClass "title" $ do
         el "h1" $ text "Flatris"
 
       resetEv <- theGameState gameDyn
-
-      theClock gameDyn
+      tickEv <- theClock gameDyn
       theScore gameDyn
       theWell gameDyn
 
       helpButtons
 
+      return (resetEv, tickEv)
+
     thePiece hoverEv hoverUpdateEv
 
-    return mouseEv
+    return (mouseEvs, controlEvs)
 
   (keyEv, wheelEv) <- bodyEvents elm
 
@@ -72,6 +73,8 @@ app initial = mdo
 
   let gameInputs = FlatrisInputs
                    { fiGame = initial
+                   , fiReset = resetEv
+                   , fiTick = tickEv
                    , fiRotate = leftmost [ wheelEv
                                          , fmapMaybe keycodeRotate keyEv ]
                    , fiDrop = leftmost [ boardClick, () <$ ffilter keycodeDrop keyEv ]
@@ -128,7 +131,7 @@ bodyEvents elm = do
 -- mouse event co-ordinates relative to an element
 offsetMouseEvent elm ev = wrapDomEvent (_element_raw elm) (elementOnEventName ev) mouseOffsetXY
 
-theClock, theScore :: MonadWidget t m => Dynamic t Flatris -> m ()
+theClock :: MonadWidget t m => Dynamic t Flatris -> m (Event t UTCTime)
 theClock gameDyn = divClass "clock" $ do
   divClass "clock-label" $ text "Clock:"
   now <- liftIO getCurrentTime
@@ -137,7 +140,9 @@ theClock gameDyn = divClass "clock" $ do
   let evClock = attachPromptlyDynWith clockTextMaybe gameDyn evTime
   divClass "clock-timer" $
     dynText =<< holdDyn "" (fmapMaybe id evClock)
+  return evTime
 
+theScore :: MonadWidget t m => Dynamic t Flatris -> m ()
 theScore gameDyn = divClass "score" $ do
   divClass "score-label" $ text "Score:"
   divClass "score-value" $ display (view score <$> gameDyn)
@@ -203,5 +208,6 @@ instructions = divClass "instructions" $ do
           elAttr "span" ("class" =: "instruction-symbol") $ text s
     divClass "row" $ mapM_ key [ ("Q", "↺"), ("W", "↑"), ("E", "↻") ]
     divClass "row" $ mapM_ key [ ("A", "←"), ("S", "↓"), ("D", "→"), ("F", "⏎") ]
+  el "p" $ text "Use the mouse button and scroll wheel and/or the keys to rotate and drop the piece."
   divClass "instructions-buttons" $ do
     button "Close"
