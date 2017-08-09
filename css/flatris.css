@@ -23,17 +23,57 @@
   flex: 0 1;
 }
 
-.board > svg {
-  /* width: 400px;
-  height: auto;
-  */
+svg rect.square {
+  rx: 5px;
+  ry: 5px;
+  stroke-width: 2px;
 }
 
-svg.well-svg {
-  /*
-  width: 160px;
-  height: auto;
-  */
+svg rect.empty {
+  fill: rgb(238, 238, 236);
+  stroke: rgb(186, 189, 182);
+}
+
+svg.float-svg rect.empty {
+  display: none;
+}
+
+svg rect.blocked {
+  fill: rgb(164, 0, 0);
+  stroke: color: rgb(204, 0, 0);
+}
+
+svg rect.piece-o {
+fill: rgb(252, 233, 79);
+stroke: rgb(196, 160, 0);
+}
+svg rect.piece-i {
+fill: rgb(138, 226, 52);
+stroke: rgb(78, 154, 6);
+}
+svg rect.piece-l {
+fill: rgb(252, 175, 62);
+stroke: rgb(206, 92, 0);
+}
+
+svg rect.piece-j {
+fill: rgb(114, 159, 207);
+stroke: rgb(32, 74, 135);
+}
+
+svg rect.piece-t {
+fill: rgb(173, 127, 168);
+stroke: rgb(92, 53, 102);
+}
+
+svg rect.piece-s {
+fill: rgb(233, 185, 110);
+stroke: rgb(143, 89, 2);
+}
+
+svg rect.piece-z {
+fill: rgb(239, 41, 41);
+stroke: rgb(164, 0, 0);
 }
 
 .right {
@@ -47,6 +87,10 @@ svg.well-svg {
 .title {
   align-self: center;
   text-align: center;
+}
+
+.title h1 {
+  margin-bottom: 1rem;
 }
 
 .clock, .score {
@@ -67,6 +111,15 @@ svg.well-svg {
   flex: 1 1;
   align-self: center;
   padding: 0.5em;
+}
+
+.game-state {
+  flex: 0 1;
+/*
+  display: flex;
+  justify-content: center;
+*/
+  text-align: center;
 }
 
 .floating-piece {
