@@ -23,6 +23,8 @@ let
     overrides = self: super: {
       diagrams-reflex = self.callPackage ./diagrams-reflex.nix {};
       reflex-dom-contrib = self.callPackage ./reflex-dom-contrib.nix {};
+      # reflex-dom-core gc test hangs when built with profiling
+      reflex-dom-core = pkgs.haskell.lib.dontCheck super.reflex-dom-core;
     };
   };
 
