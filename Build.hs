@@ -54,7 +54,8 @@ main = shakeArgs shakeOptions{shakeFiles="dist"} $ do
     forM_ ["all.min.js", "all.min.js.gz"] $ \js ->
       copyFileChanged (jsexe </> js) ("docs" </> js)
     copyAssets "docs"
-    copyFileChanged out "static/index-min.html"
+    copyFile' "static/index-min.html" out
+    return ()
 
   -- github pages jekyll filters some things
   "docs/.nojekyll" %> \out -> writeFile' out ""
