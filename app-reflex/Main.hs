@@ -31,7 +31,7 @@ import Control.Lens hiding ((#))
 import Board
 import Game
 import Network
-import BoardWidgetSvg
+import BoardWidget
 import MainWidget
 import BoardUtil (tshow)
 

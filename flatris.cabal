@@ -56,7 +56,6 @@ executable flatris-reflex
   main-is:             Main.hs
   other-modules:       Network
                      , BoardWidget
-                     , BoardWidgetSvg
                      , MainWidget
   build-depends:       array
                      , base
