@@ -36,7 +36,7 @@ boardCoordToPixel (x, y) = (s x, s y)
 
 -- Creates an svg container of the given class with appropriate
 -- dimensions and viewBox.
-boardElem :: forall t m e. MonadWidget t m => Text -> (e -> Text) -> Dynamic t (Array BIx e) -> m ()
+boardElem :: MonadWidget t m => Text -> (e -> Text) -> Dynamic t (Array BIx e) -> m ()
 boardElem cls f boardDyn = svgDynAttr "svg" (svgAttrs cls <$> boardDyn) $
                            svgClass "g" "grid" $
                            (grid f boardDyn)

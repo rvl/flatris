@@ -1,19 +1,33 @@
 {-# LANGUAGE CPP, TemplateHaskell, RankNTypes #-}
 
-module MainWidget (mainWidgetFlatris) where
+module MainWidget (mainWidgetFlatris, mainWidgetFlatrisExtern) where
 
 import Reflex.Dom
 import Data.Monoid ((<>))
+import Data.Text
+import Language.Javascript.JSaddle (JSM)
 
 -- In browser and webkit frame there are slightly different ways of
 -- importing stylesheets. Handle both with CPP.
 
 #ifdef GHCJS_BROWSER
-import Data.Text
-import GHCJS.DOM.Types (JSM)
 
 mainWidgetFlatris :: (forall x. Widget x ()) -> JSM ()
-mainWidgetFlatris = mainWidgetWithHead $ do
+mainWidgetFlatris = mainWidgetFlatrisExtern
+
+#else
+import Data.FileEmbed
+
+mainWidgetFlatris :: (forall x. Widget x ()) -> IO ()
+mainWidgetFlatris = mainWidgetWithCss (
+  $(embedFile "static/css/normalize.css") <>
+  $(embedFile "static/css/skeleton.css") <>
+  $(embedFile "static/css/flatris.css") )
+
+#endif
+
+-- mainWidgetFlatrisExtern :: (forall x. Widget x ()) -> IO ()
+mainWidgetFlatrisExtern = mainWidgetWithHead $ do
   el "title" $ text "Flatris"
   mobile_
   stylesheet_ "css/normalize.css"
@@ -32,14 +46,3 @@ stylesheet_ l = elAttr "link" ss $ pure ()
     ss = "rel"  =: "stylesheet"
       <> "type" =: "text/css"
       <> "href" =: l
-
-#else
-import Data.FileEmbed
-
-mainWidgetFlatris :: (forall x. Widget x ()) -> IO ()
-mainWidgetFlatris = mainWidgetWithCss (
-  $(embedFile "static/css/normalize.css") <>
-  $(embedFile "static/css/skeleton.css") <>
-  $(embedFile "static/css/flatris.css") )
-
-#endif

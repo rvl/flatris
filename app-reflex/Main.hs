@@ -36,10 +36,12 @@ import MainWidget
 import BoardUtil (tshow)
 
 main :: IO ()
-main = do
-  game <- newGame10
-  mainWidgetFlatris $ do
-    divClass "container-left" $ app game
+main = mainWidgetFlatris gameWidget
+
+gameWidget :: MonadWidget t m => m ()
+gameWidget = do
+  game <- liftIO newGame10
+  divClass "container-left" $ app game
 
 gameDiv :: MonadWidget t m => m a -> m (El t, a)
 gameDiv = elAttr' "div" ("class" =: "game" <> "oncontextmenu" =: "return false;")
