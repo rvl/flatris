@@ -70,12 +70,18 @@ executable flatris-reflex
                      , mtl
                      , random
                      , reflex
+                     , reflex-dom-core
                      , reflex-dom
                      , reflex-dom-contrib
                      , text
                      , time
                      , transformers
                      , colour
+                     , jsaddle
+                     , jsaddle-warp
+                     , warp
+                     , wai-app-static
+                     , websockets
   default-extensions:  OverloadedStrings
                      , TemplateHaskell
                      , RecursiveDo

@@ -1,0 +1,14 @@
+:set prompt "> "
+:set -fwarn-unused-binds -fwarn-unused-imports
+:set -isrc
+:set -iapp-reflex
+
+:set -XOverloadedStrings
+:set -XTemplateHaskell
+:set -XDeriveGeneric
+:set -XRecursiveDo
+:set -XScopedTypeVariables
+:set -XRankNTypes
+:set -XExistentialQuantification
+
+:load DevMain

@@ -16,6 +16,7 @@ import qualified GHCJS.DOM.DOMRect as DOMRect
 import GHCJS.DOM.Event (getTargetUnsafe)
 import qualified GHCJS.DOM.MouseEvent as MouseEvent
 import qualified GHCJS.DOM.WheelEvent as WheelEvent
+import Language.Javascript.JSaddle (liftJSM)
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad (void)
@@ -156,7 +157,7 @@ makeHoverEvent :: Reflex t => Event t (Int, Int)
                -> Event t (Int, Int)
                -> Event t (Int, Int)
 makeHoverEvent mousePos boardPos = leftmost
-  [ offset <$> mousePos, pad . boardCoordToPixel <$> boardPos ]
+  [ traceEvent "mouse" (offset <$> mousePos), traceEvent "key" (pad . boardCoordToPixel <$> boardPos) ]
   where
     half = squareSize `div` 2
     offset (x, y) = (x - half, y - half)

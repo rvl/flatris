@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+port=${1:-3030}
+ghcid -W --test "devMainAutoReload staticServer devMainWidget $port" --reload=static/css

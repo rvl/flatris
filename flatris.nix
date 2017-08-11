@@ -9,7 +9,11 @@
 ,    reflex
 ,    reflex-dom
 ,    reflex-dom-contrib
-
+,    jsaddle
+,    jsaddle-warp
+,    warp
+,    wai-app-static
+,    websockets
 }:
 mkDerivation {
   pname = "flatris";
@@ -28,6 +32,12 @@ mkDerivation {
     reflex
     reflex-dom
     reflex-dom-contrib
+
+    jsaddle
+    jsaddle-warp
+    warp
+    wai-app-static
+    websockets
   ];
   libraryHaskellDepends = [
     array base diagrams-lib diagrams-svg extra lens mtl random time

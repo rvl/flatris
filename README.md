@@ -29,4 +29,4 @@ Building with nix ghcjs:
 Full site build with minification (uses nix-shell and Shake). Will
 create a `docs` directory:
 
-    ./build.sh
+    ./build

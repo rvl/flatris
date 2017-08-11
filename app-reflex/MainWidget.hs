@@ -2,7 +2,9 @@
 
 module MainWidget (mainWidgetFlatris, mainWidgetFlatrisExtern) where
 
-import Reflex.Dom
+import Language.Javascript.JSaddle (JSM)
+import Reflex.Dom.Core (mainWidgetWithHead)
+import Reflex.Dom hiding (mainWidgetWithHead)
 import Data.Monoid ((<>))
 import Data.Text
 import Language.Javascript.JSaddle (JSM)
@@ -11,6 +13,7 @@ import Language.Javascript.JSaddle (JSM)
 -- importing stylesheets. Handle both with CPP.
 
 #ifdef GHCJS_BROWSER
+import Data.Text
 
 mainWidgetFlatris :: (forall x. Widget x ()) -> JSM ()
 mainWidgetFlatris = mainWidgetFlatrisExtern
@@ -26,7 +29,7 @@ mainWidgetFlatris = mainWidgetWithCss (
 
 #endif
 
--- mainWidgetFlatrisExtern :: (forall x. Widget x ()) -> IO ()
+mainWidgetFlatrisExtern :: (forall x. Widget x ()) -> JSM ()
 mainWidgetFlatrisExtern = mainWidgetWithHead $ do
   el "title" $ text "Flatris"
   mobile_
