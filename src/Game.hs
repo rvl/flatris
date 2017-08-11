@@ -7,7 +7,7 @@ module Game
   , rotatePiece
   , placePiece
   , resetGame
-  , dropChaffPiece, dropChaff
+  , dropChaffPiece, dropChaffCheck
   , clockTextMaybe
   ) where
 
@@ -72,13 +72,17 @@ rotatePiece :: Bool -> Flatris -> Flatris
 rotatePiece dir = over currentPiece (rotate dir)
 
 placePiece :: Flatris -> (Int, Int) -> (BlockedBoard, Flatris -> Flatris)
-placePiece Flatris{..} (x, y) = (piece, result)
+placePiece Flatris{..} (x, y) = (piece, action)
   where
     mark = intersection _board x y
     piece = mark _currentPiece
-    (sc, sr, board') = eliminate $ place x y _currentPiece _board
-    result | isBlocked piece = id
-           | otherwise = updateGameState . (board .~ board') . addScore sc sr . useNextPiece
+    action | isBlocked piece = id
+           | otherwise = elim . useNextPiece
+    elim = eliminateAndUpdate . over board (place x y _currentPiece)
+
+eliminateAndUpdate :: Flatris -> Flatris
+eliminateAndUpdate fl = updateGameState . (board .~ board') . addScore sc sr $ fl
+  where (sc, sr, board') = eliminate (fl ^. board)
 
 addScore :: Int -> Int -> Flatris -> Flatris
 addScore cols rows = over score (+ bonus)
@@ -106,6 +110,10 @@ isPlaying = (== Playing) . view gameState
 resetGame :: UTCTime -> Flatris -> Flatris
 resetGame now = useNextPiece . useNextPiece . (over board clearBoard) .
             (gameState .~ Playing) . (score .~ 0) . (startTime .~ now)
+
+-- Add a chaff dot and check whether it sunk the player, or cleared a line
+dropChaffCheck :: Flatris -> Flatris
+dropChaffCheck = eliminateAndUpdate . dropChaff
 
 -- Put dot(s) down randomly to mess with the player
 dropChaff :: Flatris -> Flatris

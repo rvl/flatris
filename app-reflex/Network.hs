@@ -47,7 +47,7 @@ flatrisNetwork FlatrisInputs{..} = do
                           , tag placedB fiDrop
                           , resetGame <$> tag now fiReset
                           , happenEv]
-        chaffEv = leftmost [ dropChaff <$ littleChaffEv
+        chaffEv = leftmost [ dropChaffCheck <$ littleChaffEv
                            , dropChaffPiece <$ bigChaffEv
                            ]
         happenEv = whilePlaying game chaffEv
