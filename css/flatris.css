@@ -1,3 +1,10 @@
+html, body {
+  overflow-x: hidden;
+}
+body {
+  position: relative
+}
+
 .container-left {
   margin: 8px 8px 8px 8px;
 }
@@ -21,6 +28,28 @@
 
 .board {
   flex: 0 1;
+  align-self: flex-start;
+}
+
+svg.board-svg {
+  flex: 0 0 auto;
+  width: 50vw;
+  height: 50vw;
+  max-width: 440px;
+  max-height: 440px;
+}
+
+svg.well-svg, svg.float-svg {
+  width: 20vw;
+  height: 20vw;
+  max-width: 176px;
+  max-height: 176px;
+}
+
+svg.float-svg {
+  /* transform matches .container-left margin */
+  padding-left: 8px;
+  padding-top: 8px;
 }
 
 svg rect.square {
@@ -82,6 +111,12 @@ stroke: rgb(164, 0, 0);
   flex-direction: column;
   justify-content: space-between;
   padding-left: 0.5em;
+  max-width: 22vw;
+}
+
+.right-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
@@ -133,11 +168,12 @@ stroke: rgb(164, 0, 0);
 
 .help-buttons {
   display: flex;
+  flex: 0 0 auto;
 }
 
 .help-buttons .button, .help-buttons .button-primary {
   display: flex;
-  flex: 0 1;
+  flex: 0 0 auto;
 }
 
 .help-buttons .github {
@@ -196,4 +232,50 @@ stroke: rgb(164, 0, 0);
   margin-top: 1em;
   display: flex;
   justify-content: flex-end;
+}
+
+@media all and (max-width: 639px) {
+  .game {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* would like to rearrange order but problems with coordinates
+  .board { order: 2; }
+  .right { order: 1; }
+  */
+
+  .right {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .help-buttons {
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+  }
+
+  .help-buttons .button, .help-buttons .button-primary {
+    padding: 0 15px;
+    width: 100%
+  }
+
+  svg.board-svg {
+    width: 90vw;
+    height: 90vw;
+  }
+
+  svg.well-svg, svg.float-svg {
+    width: 36vw;
+    height: 36vw;
+  }
+
+  .instructions {
+    background-color: rgba(255, 255, 255, 0.9);
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 20px;
+  }
 }
