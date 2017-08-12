@@ -16,19 +16,19 @@ newGame10 = newGame (10, 10)
 data FlatrisMove = MoveLeft | MoveRight | MoveUp | MoveDown deriving Show
 
 data FlatrisInputs t = FlatrisInputs
-  { fiGame :: Flatris
-  , fiReset :: Event t ()
-  , fiTick :: Event t UTCTime
-  , fiRotate :: Event t Bool
-  , fiDrop :: Event t ()
-  , fiHover :: Event t (Int, Int)
-  , fiPush :: Event t FlatrisMove
+  { fiGame :: Flatris             -- ^ Initial game state
+  , fiReset :: Event t ()         -- ^ Start new game
+  , fiTick :: Event t UTCTime     -- ^ Regular update event
+  , fiRotate :: Event t Bool      -- ^ Rotation direction
+  , fiDrop :: Event t ()          -- ^ Place piece at current position
+  , fiHover :: Event t (Int, Int) -- ^ Board coords of mouse hover
+  , fiPush :: Event t FlatrisMove -- ^ Keyboard move
   }
 
 data FlatrisOutputs t = FlatrisOutputs
-  { foGame :: Dynamic t Flatris
-  , foHover :: Event t BlockedBoard
-  , foMoveCoord :: Event t (Int, Int)
+  { foGame :: Dynamic t Flatris       -- ^ Current game state
+  , foHover :: Event t BlockedBoard   -- ^ Hovering piece to show
+  , foMoveCoord :: Event t (Int, Int) -- ^ Board coords of hover piece
   }
 
 flatrisNetwork :: (Reflex t, MonadFix m, MonadHold t m) => FlatrisInputs t -> m (FlatrisOutputs t)
@@ -38,9 +38,8 @@ flatrisNetwork FlatrisInputs{..} = do
 
   now <- hold (posixSecondsToUTCTime 0) fiTick
 
-  -- fixme: this would be slightly simpler if placePiece were cut in half
   rec
-    let placed = attachWith placePiece (current game) hoverCoord
+    let placed = attachWith placePiece (current game) placeCoord
     placedB <- hold id (snd <$> placed)
 
     let gameEv = leftmost [ rotatePiece <$> fiRotate
@@ -54,24 +53,27 @@ flatrisNetwork FlatrisInputs{..} = do
 
     game <- foldDyn ($) fiGame gameEv
 
-    hoverCoord <- makeHoverCoord (() <$ updated game) fiHover fiPush
+    (hoverCoord, placeCoord) <- makeHoverCoord (() <$ updated game) fiHover fiPush
 
-  let hoverEv = fst <$> attachPromptlyDynWith placePiece game (leftmost [hoverCoord, fiHover])
+  let hoverEv = fst <$> attachPromptlyDynWith placePiece game placeCoord
 
   return $ FlatrisOutputs game hoverEv hoverCoord
 
+-- | Returns the position of the hovering piece in two different ways.
+-- First is the hover position used to update the element on screen.
+-- Second is the hover position used to place a piece on the board.
 makeHoverCoord :: (Reflex t, MonadFix m, MonadHold t m)
                => Event t ()
                -> Event t (Int, Int)
                -> Event t FlatrisMove
-               -> m (Event t (Int, Int))
+               -> m (Event t (Int, Int), Event t (Int, Int))
 makeHoverCoord game hover pushed = do
   rec
-    hoverState <- hold (0,0) hover'
-    let hover' = leftmost [ attachWith pushCoord hoverState pushed
-                          , hover
-                          , tag hoverState game ]
-  return hover'
+    let hoverGame = leftmost [ attachWith pushCoord hoverState pushed
+                             , tag hoverState game ]
+        hoverBoth = leftmost [ hover,  hoverGame]
+    hoverState <- hold (-4,-4) hoverBoth
+  return (hoverGame, hoverBoth)
 
 pushCoord :: (Int, Int) -> FlatrisMove -> (Int, Int)
 pushCoord (i, j) m = (i + x, y + j)
