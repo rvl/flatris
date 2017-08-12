@@ -36,31 +36,39 @@ boardCoordToPixel (x, y) = (s x, s y)
 
 -- Creates an svg container of the given class with appropriate
 -- dimensions and viewBox.
-boardElem :: MonadWidget t m => Text -> (e -> Text) -> Dynamic t (Array BIx e) -> m ()
-boardElem cls f boardDyn = svgDynAttr "svg" (svgAttrs cls <$> boardDyn) $
-                           svgClass "g" "grid" $
-                           (grid f boardDyn)
+boardElem :: MonadWidget t m
+          => (Array BIx e -> Map Text Text)
+          -> (e -> Text)
+          -> Dynamic t (Array BIx e) -> m ()
+boardElem attrs f boardDyn = svgDynAttr "svg" (attrs <$> boardDyn) $
+                             svgClass "g" "grid" $
+                             (grid f boardDyn)
 
 svgAttrs :: Text -> Array BIx e -> Map Text Text
-svgAttrs c b = "class" =: c <> "viewBox" =: viewBox <> "width" =: tshow w <> "height" =: tshow h
+svgAttrs cls b = svgSizeAttrs cls w h
   where
-    (_, (w', h')) = bounds b
-    w = w' * squareSize
-    h = h' * squareSize
-    viewBox = pack . unwords . map show $ [0, 0, w, h]
+    (_, (w, h)) = bounds b
+
+svgSizeAttrs :: Text -> Int -> Int -> Map Text Text
+svgSizeAttrs cls w h = "class" =: cls <> "viewBox" =: viewBox <> "width" =: tshow w' <> "height" =: tshow h'
+  where
+    w' = w * squareSize
+    h' = h * squareSize
+    viewBox = pack . unwords . map show $ [0, 0, w', h']
 
 grid :: MonadWidget t m => (e -> Text) -> Dynamic t (Array BIx e) -> m ()
 grid f boardDyn = void $ dyn (contents <$> boardDyn)
   where contents = mapM_ (boardSquare f) . assocs
 
 boardSvg :: MonadWidget t m => Dynamic t Flatris -> m ()
-boardSvg = boardElem "board-svg" boardSquareClass . fmap (view board)
+boardSvg = boardElem (svgAttrs "board-svg") boardSquareClass . fmap (view board)
 
 floatSvg :: MonadWidget t m => BlockedBoard -> m ()
-floatSvg = boardElem "float-svg" blockedBoardSquareClass . pure
+floatSvg = boardElem attrs blockedBoardSquareClass . pure
+  where attrs = const $ svgSizeAttrs "float-svg" 4 4
 
 wellSvg :: MonadWidget t m => Dynamic t Flatris -> m ()
-wellSvg = boardElem "well-svg" boardSquareClass . nextPieceDyn
+wellSvg = boardElem (svgAttrs "well-svg") boardSquareClass . nextPieceDyn
   where nextPieceDyn = fmap (view (nextPiece . to expandShapeBoard))
 
 boardSquare :: MonadWidget t m => (s -> Text) -> ((Int, Int), s) -> m ()

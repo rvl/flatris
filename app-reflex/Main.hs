@@ -53,12 +53,15 @@ app initial = mdo
     mouseEvs <- theBoard gameDyn
 
     (controlEvs, helpingDyn) <- divClass "right" $ do
-      divClass "title" $ do
-        el "h1" $ text "Flatris"
+      (reset, tick) <- divClass "right-info" $ do
+        divClass "title" $ do
+          el "h1" $ text "Flatris"
 
-      reset <- theGameState gameDyn
-      tick <- theClock gameDyn
-      theScore gameDyn
+        reset <- theGameState gameDyn
+        tick <- theClock gameDyn
+        theScore gameDyn
+        return (reset, tick)
+
       theWell gameDyn
 
       helping <- helpButtons
