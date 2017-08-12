@@ -18,10 +18,10 @@ let
   # compiler could be ghcjs or ghc
   reflex-platform = tryReflex.${compiler};
 
-  # overrides for reflex version compatibility
+  # overrides of various packages
   haskellPackages = reflex-platform.override {
     overrides = self: super: {
-      diagrams-reflex = self.callPackage ./diagrams-reflex.nix {};
+      # for version compatibility with this reflex
       reflex-dom-contrib = self.callPackage ./reflex-dom-contrib.nix {};
       # reflex-dom-core gc test hangs when built with profiling
       reflex-dom-core = pkgs.haskell.lib.dontCheck super.reflex-dom-core;

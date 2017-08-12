@@ -61,7 +61,6 @@ executable flatris-reflex
                      , base
                      , containers
                      , diagrams-lib
-                     , diagrams-reflex
                      , extra
                      , file-embed
                      , flatris
