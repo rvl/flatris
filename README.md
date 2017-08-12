@@ -43,10 +43,13 @@ can be loaded and started through `ghci`.
 
 For automatic reloading, the app runs a web server and is viewed with
 a web browser. It uses [ghcid](ghcid) to monitor the sources and
-reload the code. To start the auto-reloading dev server:
+reload the code.
+
+To start the auto-reloading dev server (do this within nix-shell):
 
     ./dev-server
 
+Then visit http://localhost:3030/
 
 [reflex]: https://github.com/reflex-frp/reflex-platform
 [shake]: http://shakebuild.com/
