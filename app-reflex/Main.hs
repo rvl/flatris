@@ -137,8 +137,15 @@ bodyEvents elm = do
     return False
   return (keyEv, wheelEv)
 
+-- mouse event co-ordinates relative to document.
 -- mouse event co-ordinates relative to an element
-offsetMouseEvent elm ev = wrapDomEvent (_element_raw elm) (elementOnEventName ev) mouseOffsetXY
+offsetMouseEvent elm ev = wrapDomEvent e (elementOnEventName ev) offsetXY
+  where
+    e = _element_raw elm
+    offsetXY = do
+      (x, y) <- uiPageXY
+      -- fixme: padding hardcoded -- need to get element position from dom
+      return (x - 8, y - 8)
 
 theClock :: MonadWidget t m => Dynamic t Flatris -> m (Event t UTCTime)
 theClock gameDyn = divClass "clock" $ do
@@ -160,11 +167,10 @@ makeHoverEvent :: Reflex t => Event t (Int, Int)
                -> Event t (Int, Int)
                -> Event t (Int, Int)
 makeHoverEvent mousePos boardPos = leftmost
-  [ traceEvent "mouse" (offset <$> mousePos), traceEvent "key" (pad . boardCoordToPixel <$> boardPos) ]
+  [ (offset <$> mousePos), (boardCoordToPixel <$> boardPos) ]
   where
     half = squareSize `div` 2
     offset (x, y) = (x - half, y - half)
-    pad (x, y) = (x + 8, y + 8) -- fixme: value from dom
 
 thePiece :: MonadWidget t m => Event t BlockedBoard
          -> Event t (Int, Int) -> m ()

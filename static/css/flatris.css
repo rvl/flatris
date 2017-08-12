@@ -46,6 +46,12 @@ svg.well-svg, svg.float-svg {
   max-height: 176px;
 }
 
+svg.float-svg {
+  /* transform matches .container-left margin */
+  padding-left: 8px;
+  padding-top: 8px;
+}
+
 svg rect.square {
   rx: 5px;
   ry: 5px;
